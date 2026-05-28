@@ -5,61 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Merge 2048 - Gaby International</title>
 <style>
-:root {
-  --bg: #faf8ef; --text: #776e65; --board: #bbada0; --tile: #eee4da; --accent: #f67c5f;
-}
-[data-theme="dark"] {
-  --bg: #1a1a1a; --text: #f5f5f5; --board: #2d2d2d; --tile: #3d3d3d; --accent: #ff6b6b;
-}
+:root { --bg: #faf8ef; --text: #776e65; --board: #bbada0; --tile: #eee4da; --accent: #f67c5f; }
+[data-theme="dark"] { --bg: #1a1a1a; --text: #f5f5f5; --board: #2d2d2d; --tile: #3d3d3d; --accent: #ff6b6b; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  font-family: Arial, sans-serif; background: var(--bg); color: var(--text);
-  display: flex; flex-direction: column; align-items: center; padding: 20px; transition: 0.3s;
-}
+body { font-family: Arial, sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; padding: 20px; transition: 0.3s; }
 .header { text-align: center; margin-bottom: 15px; }
 h1 { font-size: 48px; font-weight: bold; }
 .subtitle { font-size: 14px; color: var(--accent); margin-top: 5px; }
 .controls { display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap; justify-content: center; }
-button {
-  background: var(--accent); color: white; border: none; padding: 10px 12px;
-  border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px;
-}
+button { background: var(--accent); color: white; border: none; padding: 10px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; }
 button:disabled { opacity: 0.4; cursor: not-allowed; }
 .scoreboard { display: flex; gap: 15px; margin-bottom: 15px; }
-.score-box {
-  background: var(--board); color: white; padding: 10px 15px;
-  border-radius: 5px; text-align: center; min-width: 80px;
-}
-.game-container {
-  width: 400px; height: 400px; background: var(--board);
-  border-radius: 10px; padding: 10px; position: relative; overflow: hidden;
-}
+.score-box { background: var(--board); color: white; padding: 10px 15px; border-radius: 5px; text-align: center; min-width: 80px; }
+.game-container { width: 400px; height: 400px; background: var(--board); border-radius: 10px; padding: 10px; position: relative; overflow: hidden; }
 .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-.tile {
-  width: 87px; height: 87px; background: var(--tile); border-radius: 5px;
-  display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: bold;
-  transition: all 0.15s ease-in-out;
-}
+.tile { width: 87px; height: 87px; background: var(--tile); border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: bold; transition: all 0.15s ease-in-out; }
 .tile.new { animation: pop 0.15s ease-in-out; }
-@keyframes pop {
- 0% { transform: scale(0); }
- 100% { transform: scale(1); }
-}
-@keyframes floatUp {
- 0% { opacity: 1; transform: translateY(0); }
- 100% { opacity: 0; transform: translateY(-40px); }
-}
+@keyframes pop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+@keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-40px); } }
 footer { margin-top: 30px; font-size: 12px; text-align: center; opacity: 0.7; }
-.game-over {
-  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(238, 228, 218, 0.9); display: none;
-  flex-direction: column; align-items: center; justify-content: center;
-  font-size: 48px; font-weight: bold; border-radius: 10px;
-}
-@media (max-width: 420px) {
-.game-container { width: 320px; height: 320px; }
-.tile { width: 67px; height: 67px; font-size: 24px; }
-}
+.game-over { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(238, 228, 218, 0.9); display: none; flex-direction: column; align-items: center; justify-content: center; font-size: 48px; font-weight: bold; border-radius: 10px; }
+@media (max-width: 420px) {.game-container { width: 320px; height: 320px; }.tile { width: 67px; height: 67px; font-size: 24px; } }
 </style>
 </head>
 <body>
@@ -114,117 +80,36 @@ function playSound(type) {
   }
 }
 
-const themeBtn = document.getElementById('themeBtn');
-const savedTheme = localStorage.getItem('theme') || 'light';
-document.body.setAttribute('data-theme', savedTheme);
-themeBtn.textContent = savedTheme === 'dark'? '☀️ Light' : '🌙 Dark';
-themeBtn.onclick = () => {
-  const newTheme = document.body.getAttribute('data-theme') === 'dark'? 'light' : 'dark';
-  document.body.setAttribute('data-theme', newTheme);
-  localStorage.setItem('theme', newTheme);
-  themeBtn.textContent = newTheme === 'dark'? '☀️ Light' : '🌙 Dark';
-};
-
-document.getElementById('bestScore').textContent = bestScore;
-
-const pauseBtn = document.getElementById('pauseBtn');
-pauseBtn.onclick = () => {
-  paused =!paused;
-  pauseBtn.textContent = paused? '▶️ Resume' : '⏸️ Pause';
+function showScorePopup(value, i, j) {
+  const tileSize = document.querySelector('.tile')?.offsetWidth || 87;
+  const gap = 10;
+  const x = j * (tileSize + gap) + tileSize / 2;
+  const y = i * (tileSize + gap);
+  const popup = document.createElement('div');
+  popup.textContent = '+' + value;
+  popup.style.cssText = `position: absolute; left: ${x}px; top: ${y}px; color: #f67c5f; font-weight: bold; font-size: 20px; animation: floatUp 0.8s ease-out forwards; pointer-events: none;`;
+  document.querySelector('.game-container').appendChild(popup);
+  setTimeout(() => popup.remove(), 800);
 }
 
-const undoBtn = document.getElementById('undoBtn');
-undoBtn.onclick = () => {
-  if (history.length > 0 &&!gameOver &&!paused) {
-    const prevState = history.pop();
-    board = prevState.board;
-    score = prevState.score;
-    updateScore(score);
-    render();
-    undoBtn.disabled = history.length === 0;
-  }
-};
-
-document.getElementById('shareBtn').onclick = () => {
-  const text = `Nimepata ${score} points kwenye Merge 2048! 🎮`;
-  if (navigator.share) {
-    navigator.share({ text, url: window.location.href }).catch(()=>{});
-  } else {
-    window.open(`https://wa.me/?text=${encodeURIComponent(text + ' + window.location.href)}`);
-  }
-};
-
-const challengeBtn = document.getElementById('challengeBtn');
-challengeBtn.onclick = () => startDailyChallenge();
-
-function getDailySeed() {
-  const today = new Date().toISOString().slice(0, 10);
-  let hash = 0;
-  for (let i = 0; i < today.length; i++) {
-    hash = ((hash << 5) - hash) + today.charCodeAt(i);
-    hash |= 0;
-  }
-  return Math.abs(hash);
-}
-
-function seededRandom(seed) {
-  let x = Math.sin(seed++) * 10000;
-  return x - Math.floor(x);
-}
-
-function startDailyChallenge() {
-  isChallenge = true;
-  const seed = getDailySeed();
-  board = Array(4).fill().map(() => Array(4).fill(0));
-  score = 0;
-  gameOver = false;
-  history = [];
-  paused = false;
-  pauseBtn.textContent = '⏸️ Pause';
-
-  let r1 = Math.floor(seededRandom(seed) * 4);
-  let c1 = Math.floor(seededRandom(seed + 1) * 4);
-  board[r1][c1] = 2;
-
-  let r2, c2;
-  do {
-    r2 = Math.floor(seededRandom(seed + 2) * 4);
-    c2 = Math.floor(seededRandom(seed + 3) * 4);
-  } while(r2 === r1 && c2 === c1);
-  board[r2][c2] = 2;
-
-  render();
-  updateScore(0);
-  document.getElementById('subtitle').textContent = "📅 Daily Challenge";
-  checkDailyStatus();
-}
-
-function checkDailyStatus() {
-  const today = new Date().toISOString().slice(0, 10);
-  if (localStorage.getItem('challengeDate') === today) {
-    challengeBtn.disabled = true;
-    challengeBtn.textContent = "✅ Done";
-  } else {
-    challengeBtn.disabled = false;
-    challengeBtn.textContent = "📅 Daily";
+function render() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  for (let i = 0; i < 4; i++) {
+    for (let j = 0; j < 4; j++) {
+      const val = board[i][j];
+      const tile = document.createElement('div');
+      tile.className = 'tile';
+      tile.textContent = val > 0? val : '';
+      tile.style.backgroundColor = val > 0? getTileColor(val) : 'var(--tile)';
+      grid.appendChild(tile);
+    }
   }
 }
 
-function initGame() {
-  isChallenge = false;
-  paused = false;
-  pauseBtn.textContent = '⏸️ Pause';
-  document.getElementById('subtitle').textContent = "Made by Gaby International";
-  board = Array(4).fill().map(() => Array(4).fill(0));
-  score = 0;
-  gameOver = false;
-  history = [];
-  undoBtn.disabled = true;
-  addTile(false);
-  addTile(false);
-  render();
-  checkDailyStatus();
-  document.getElementById('gameOver').style.display = 'none';
+function getTileColor(val) {
+  const colors = {2: '#eee4da', 4: '#ede0c8', 8: '#f2b179', 16: '#f59563', 32: '#f67c5f', 64: '#f65e3b', 128: '#edcf72', 256: '#edcc61', 512: '#edc850', 1024: '#edc53f', 2048: '#edc22e'};
+  return colors[val] || '#3c3a32';
 }
 
 function addTile(isNew) {
@@ -248,45 +133,21 @@ function addTile(isNew) {
   }
 }
 
-function render() {
-  const grid = document.getElementById('grid');
-  grid.innerHTML = '';
-  for (let i = 0; i < 4; i++) {
-    for (let j = 0; j < 4; j++) {
-      const val = board[i][j];
-      const tile = document.createElement('div');
-      tile.className = 'tile';
-      tile.textContent = val > 0? val : '';
-      tile.style.backgroundColor = val > 0? getTileColor(val) : 'var(--tile)';
-      grid.appendChild(tile);
-    }
-  }
-}
-
-function getTileColor(val) {
-  const colors = {
-    2: '#eee4da', 4: '#ede0c8', 8: '#f2b179', 16: '#f59563',
-    32: '#f67c5f', 64: '#f65e3b', 128: '#edcf72', 256: '#edcc61',
-    512: '#edc850', 1024: '#edc53f', 2048: '#edc22e'
-  };
-  return colors[val] || '#3c3a32';
-}
-
-function showScorePopup(value, i, j) {
-  const tileSize = document.querySelector('.tile')?.offsetWidth || 87;
-  const gap = 10;
-  const x = j * (tileSize + gap) + tileSize / 2;
-  const y = i * (tileSize + gap);
-  const popup = document.createElement('div');
-  popup.textContent = '+' + value;
-  popup.style.cssText = `
-    position: absolute; left: ${x}px; top: ${y}px;
-    color: #f67c5f; font-weight: bold; font-size: 20px;
-    animation: floatUp 0.8s ease-out forwards;
-    pointer-events: none;
-  `;
-  document.querySelector('.game-container').appendChild(popup);
-  setTimeout(() => popup.remove(), 800);
+function initGame() {
+  isChallenge = false;
+  paused = false;
+  pauseBtn.textContent = '⏸️ Pause';
+  document.getElementById('subtitle').textContent = "Made by Gaby International";
+  board = Array(4).fill().map(() => Array(4).fill(0));
+  score = 0;
+  gameOver = false;
+  history = [];
+  undoBtn.disabled = true;
+  addTile(false);
+  addTile(false);
+  render();
+  checkDailyStatus();
+  document.getElementById('gameOver').style.display = 'none';
 }
 
 function updateScore(newScore) {
@@ -301,7 +162,6 @@ function updateScore(newScore) {
 
 function move(direction) {
   if (gameOver || paused) return;
-
   history.push({ board: JSON.parse(JSON.stringify(board)), score });
   if (history.length > 3) history.shift();
   undoBtn.disabled = false;
@@ -313,7 +173,6 @@ function move(direction) {
     for (let i = 0; i < 4; i++) {
       let row = newBoard[i].filter(x => x!== 0);
       if (direction === 'right') row.reverse();
-
       for (let j = 0; j < row.length - 1; j++) {
         if (row[j] === row[j + 1]) {
           row[j] *= 2;
@@ -326,7 +185,6 @@ function move(direction) {
       row = row.filter(x => x!== 0);
       while (row.length < 4) row.push(0);
       if (direction === 'right') row.reverse();
-
       if (JSON.stringify(row)!== JSON.stringify(newBoard[i])) moved = true;
       newBoard[i] = row;
     }
@@ -338,7 +196,6 @@ function move(direction) {
       for (let i = 0; i < 4; i++) col.push(newBoard[i][j]);
       col = col.filter(x => x!== 0);
       if (direction === 'down') col.reverse();
-
       for (let i = 0; i < col.length - 1; i++) {
         if (col[i] === col[i + 1]) {
           col[i] *= 2;
@@ -351,7 +208,6 @@ function move(direction) {
       col = col.filter(x => x!== 0);
       while (col.length < 4) col.push(0);
       if (direction === 'down') col.reverse();
-
       for (let i = 0; i < 4; i++) {
         if (newBoard[i][j]!== col[i]) moved = true;
         newBoard[i][j] = col[i];
@@ -389,21 +245,106 @@ function checkGameOver() {
   }
 }
 
+function getDailySeed() {
+  const today = new Date().toISOString().slice(0, 10);
+  let hash = 0;
+  for (let i = 0; i < today.length; i++) {
+    hash = ((hash << 5) - hash) + today.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash);
+}
+
+function seededRandom(seed) {
+  let x = Math.sin(seed++) * 10000;
+  return x - Math.floor(x);
+}
+
+function startDailyChallenge() {
+  isChallenge = true;
+  const seed = getDailySeed();
+  board = Array(4).fill().map(() => Array(4).fill(0));
+  score = 0;
+  gameOver = false;
+  history = [];
+  paused = false;
+  pauseBtn.textContent = '⏸️ Pause';
+  let r1 = Math.floor(seededRandom(seed) * 4);
+  let c1 = Math.floor(seededRandom(seed + 1) * 4);
+  board[r1][c1] = 2;
+  let r2, c2;
+  do {
+    r2 = Math.floor(seededRandom(seed + 2) * 4);
+    c2 = Math.floor(seededRandom(seed + 3) * 4);
+  } while(r2 === r1 && c2 === c1);
+  board[r2][c2] = 2;
+  render();
+  updateScore(0);
+  document.getElementById('subtitle').textContent = "📅 Daily Challenge";
+  checkDailyStatus();
+}
+
+function checkDailyStatus() {
+  const today = new Date().toISOString().slice(0, 10);
+  if (localStorage.getItem('challengeDate') === today) {
+    challengeBtn.disabled = true;
+    challengeBtn.textContent = "✅ Done";
+  } else {
+    challengeBtn.disabled = false;
+    challengeBtn.textContent = "📅 Daily";
+  }
+}
+
+const themeBtn = document.getElementById('themeBtn');
+const savedTheme = localStorage.getItem('theme') || 'light';
+document.body.setAttribute('data-theme', savedTheme);
+themeBtn.textContent = savedTheme === 'dark'? '☀️ Light' : '🌙 Dark';
+themeBtn.onclick = () => {
+  const newTheme = document.body.getAttribute('data-theme') === 'dark'? 'light' : 'dark';
+  document.body.setAttribute('data-theme', newTheme);
+  localStorage.setItem('theme', newTheme);
+  themeBtn.textContent = newTheme === 'dark'? '☀️ Light' : '🌙 Dark';
+};
+
+document.getElementById('bestScore').textContent = bestScore;
+const pauseBtn = document.getElementById('pauseBtn');
+pauseBtn.onclick = () => {
+  paused =!paused;
+  pauseBtn.textContent = paused? '▶️ Resume' : '⏸️ Pause';
+}
+const undoBtn = document.getElementById('undoBtn');
+undoBtn.onclick = () => {
+  if (history.length > 0 &&!gameOver &&!paused) {
+    const prevState = history.pop();
+    board = prevState.board;
+    score = prevState.score;
+    updateScore(score);
+    render();
+    undoBtn.disabled = history.length === 0;
+  }
+};
+document.getElementById('shareBtn').onclick = () => {
+  const text = `Nimepata ${score} points kwenye Merge 2048! 🎮`;
+  if (navigator.share) {
+    navigator.share({ text, url: window.location.href }).catch(()=>{});
+  } else {
+    window.open(`https://wa.me/?text=${encodeURIComponent(text + ' + window.location.href)}`);
+  }
+};
+const challengeBtn = document.getElementById('challengeBtn');
+challengeBtn.onclick = () => startDailyChallenge();
 document.addEventListener('keydown', (e) => {
   if (e.key === 'ArrowLeft') move('left');
   if (e.key === 'ArrowRight') move('right');
   if (e.key === 'ArrowUp') move('up');
   if (e.key === 'ArrowDown') move('down');
 });
-
 document.getElementById('restartBtn').onclick = initGame;
-
 let touchStartX, touchStartY;
 document.addEventListener('touchstart', e => {
   touchStartX = e.touches[0].clientX;
   touchStartY = e.touches[0].clientY;
 });
-
 document.addEventListener('touchend', e => {
   const dx = e.changedTouches[0].clientX - touchStartX;
   const dy = e.changedTouches[0].clientY - touchStartY;
