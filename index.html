@@ -5,27 +5,55 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Merge 2048 - Gaby International</title>
 <style>
-:root { --bg: #faf8ef; --text: #776e65; --board: #bbada0; --tile: #eee4da; --accent: #f67c5f; }
-[data-theme="dark"] { --bg: #1a1a1a; --text: #f5f5f5; --board: #2d2d2d; --tile: #3d3d3d; --accent: #ff6b6b; }
+:root {
+  --bg: #faf8ef; --text: #776e65; --board: #bbada0; --tile: #eee4da; --accent: #f67c5f;
+}
+[data-theme="dark"] {
+  --bg: #1a1a1a; --text: #f5f5f5; --board: #2d2d2d; --tile: #3d3d3d; --accent: #ff6b6b;
+}
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: Arial, sans-serif; background: var(--bg); color: var(--text); display: flex; flex-direction: column; align-items: center; padding: 20px; transition: 0.3s; }
+body {
+  font-family: Arial, sans-serif; background: var(--bg); color: var(--text);
+  display: flex; flex-direction: column; align-items: center; padding: 20px; transition: 0.3s;
+}
 .header { text-align: center; margin-bottom: 15px; }
 h1 { font-size: 48px; font-weight: bold; }
 .subtitle { font-size: 14px; color: var(--accent); margin-top: 5px; }
 .controls { display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap; justify-content: center; }
-button { background: var(--accent); color: white; border: none; padding: 10px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px; }
+button {
+  background: var(--accent); color: white; border: none; padding: 10px 12px;
+  border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 13px;
+}
 button:disabled { opacity: 0.4; cursor: not-allowed; }
 .scoreboard { display: flex; gap: 15px; margin-bottom: 15px; }
-.score-box { background: var(--board); color: white; padding: 10px 15px; border-radius: 5px; text-align: center; min-width: 80px; }
-.game-container { width: 400px; height: 400px; background: var(--board); border-radius: 10px; padding: 10px; position: relative; overflow: hidden; }
+.score-box {
+  background: var(--board); color: white; padding: 10px 15px;
+  border-radius: 5px; text-align: center; min-width: 80px;
+}
+.game-container {
+  width: 400px; height: 400px; background: var(--board);
+  border-radius: 10px; padding: 10px; position: relative; overflow: hidden;
+}
 .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-.tile { width: 87px; height: 87px; background: var(--tile); border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: bold; transition: all 0.15s ease-in-out; }
+.tile {
+  width: 87px; height: 87px; background: var(--tile); border-radius: 5px;
+  display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: bold;
+  transition: all 0.15s ease-in-out;
+}
 .tile.new { animation: pop 0.15s ease-in-out; }
 @keyframes pop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
 @keyframes floatUp { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 0; transform: translateY(-40px); } }
 footer { margin-top: 30px; font-size: 12px; text-align: center; opacity: 0.7; }
-.game-over { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(238, 228, 218, 0.9); display: none; flex-direction: column; align-items: center; justify-content: center; font-size: 48px; font-weight: bold; border-radius: 10px; }
-@media (max-width: 420px) {.game-container { width: 320px; height: 320px; }.tile { width: 67px; height: 67px; font-size: 24px; } }
+.game-over {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(238, 228, 218, 0.9); display: none;
+  flex-direction: column; align-items: center; justify-content: center;
+  font-size: 48px; font-weight: bold; border-radius: 10px;
+}
+@media (max-width: 420px) {
+.game-container { width: 320px; height: 320px; }
+.tile { width: 67px; height: 67px; font-size: 24px; }
+}
 </style>
 </head>
 <body>
@@ -136,13 +164,13 @@ function addTile(isNew) {
 function initGame() {
   isChallenge = false;
   paused = false;
-  pauseBtn.textContent = '⏸️ Pause';
+  document.getElementById('pauseBtn').textContent = '⏸️ Pause';
   document.getElementById('subtitle').textContent = "Made by Gaby International";
   board = Array(4).fill().map(() => Array(4).fill(0));
   score = 0;
   gameOver = false;
   history = [];
-  undoBtn.disabled = true;
+  document.getElementById('undoBtn').disabled = true;
   addTile(false);
   addTile(false);
   render();
@@ -164,7 +192,7 @@ function move(direction) {
   if (gameOver || paused) return;
   history.push({ board: JSON.parse(JSON.stringify(board)), score });
   if (history.length > 3) history.shift();
-  undoBtn.disabled = false;
+  document.getElementById('undoBtn').disabled = false;
 
   let moved = false;
   let newBoard = JSON.parse(JSON.stringify(board));
@@ -224,7 +252,7 @@ function move(direction) {
     checkGameOver();
   } else {
     history.pop();
-    if (history.length === 0) undoBtn.disabled = true;
+    if (history.length === 0) document.getElementById('undoBtn').disabled = true;
   }
 }
 
@@ -268,7 +296,7 @@ function startDailyChallenge() {
   gameOver = false;
   history = [];
   paused = false;
-  pauseBtn.textContent = '⏸️ Pause';
+  document.getElementById('pauseBtn').textContent = '⏸️ Pause';
   let r1 = Math.floor(seededRandom(seed) * 4);
   let c1 = Math.floor(seededRandom(seed + 1) * 4);
   board[r1][c1] = 2;
@@ -286,12 +314,13 @@ function startDailyChallenge() {
 
 function checkDailyStatus() {
   const today = new Date().toISOString().slice(0, 10);
+  const btn = document.getElementById('challengeBtn');
   if (localStorage.getItem('challengeDate') === today) {
-    challengeBtn.disabled = true;
-    challengeBtn.textContent = "✅ Done";
+    btn.disabled = true;
+    btn.textContent = "✅ Done";
   } else {
-    challengeBtn.disabled = false;
-    challengeBtn.textContent = "📅 Daily";
+    btn.disabled = false;
+    btn.textContent = "📅 Daily";
   }
 }
 
@@ -331,8 +360,7 @@ document.getElementById('shareBtn').onclick = () => {
     window.open(`https://wa.me/?text=${encodeURIComponent(text + ' + window.location.href)}`);
   }
 };
-const challengeBtn = document.getElementById('challengeBtn');
-challengeBtn.onclick = () => startDailyChallenge();
+document.getElementById('challengeBtn').onclick = () => startDailyChallenge();
 document.addEventListener('keydown', (e) => {
   if (e.key === 'ArrowLeft') move('left');
   if (e.key === 'ArrowRight') move('right');
@@ -340,6 +368,7 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'ArrowDown') move('down');
 });
 document.getElementById('restartBtn').onclick = initGame;
+
 let touchStartX, touchStartY;
 document.addEventListener('touchstart', e => {
   touchStartX = e.touches[0].clientX;
