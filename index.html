@@ -220,8 +220,8 @@ function initGame() {
   gameOver = false;
   history = [];
   undoBtn.disabled = true;
-  addTile(true);
-  addTile(true);
+  addTile(false);
+  addTile(false);
   render();
   checkDailyStatus();
   document.getElementById('gameOver').style.display = 'none';
@@ -239,6 +239,7 @@ function addTile(isNew) {
     board[i][j] = Math.random() < 0.9? 2 : 4;
     if (isNew) {
       setTimeout(() => {
+        render();
         const tiles = document.querySelectorAll('.tile');
         const index = i * 4 + j;
         if (tiles[index]) tiles[index].classList.add('new');
@@ -272,7 +273,7 @@ function getTileColor(val) {
 }
 
 function showScorePopup(value, i, j) {
-  const tileSize = document.querySelector('.tile').offsetWidth;
+  const tileSize = document.querySelector('.tile')?.offsetWidth || 87;
   const gap = 10;
   const x = j * (tileSize + gap) + tileSize / 2;
   const y = i * (tileSize + gap);
