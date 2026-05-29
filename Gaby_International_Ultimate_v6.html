@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Merge 2048 Ultimate V6 - Gaby International</title>
+<style>
+body{font-family:Arial,sans-serif;background:#faf8ef;color:#776e65;text-align:center;padding:15px}
+.dark{background:#1a1a1a;color:#f5f5f5}
+.board{display:grid;grid-template-columns:repeat(4,82px);gap:8px;background:#bbada0;padding:10px;border-radius:10px;width:max-content;margin:auto}
+.tile{width:82px;height:82px;border-radius:6px;background:#cdc1b4;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:bold;animation:pop .15s}
+@keyframes pop{from{transform:scale(.8)}to{transform:scale(1)}}
+.panel{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.card{background:#eee;padding:8px 12px;border-radius:8px}
+button{padding:8px 12px;margin:2px}
+#status{font-weight:bold;margin:10px}
+</style>
+</head>
+<body>
+<h1>Merge 2048 Ultimate V6</h1>
+<p>Powered by Gaby International</p>
+
+<div class="panel">
+<div class="card">Score <span id="score">0</span></div>
+<div class="card">Best <span id="best">0</span></div>
+<div class="card">Coins <span id="coins">0</span></div>
+</div>
+
+<p>
+<button onclick="newGame()">New</button>
+<button onclick="undo()">Undo</button>
+<button onclick="toggleTheme()">Theme</button>
+<button onclick="dailyReward()">Daily Reward</button>
+<button onclick="pauseGame()">Pause</button>
+</p>
+
+<div id="status"></div>
+<div id="board" class="board"></div>
+
+<script>
+let board=[],score=0,best=+localStorage.best||0,coins=+localStorage.coins||0;
+let paused=false,history=[];
+
+function msg(t){document.getElementById('status').textContent=t;}
+function save(){
+ localStorage.board=JSON.stringify(board);
+ localStorage.score=score;
+ localStorage.best=best;
+ localStorage.coins=coins;
+}
+
+function render(){
+ let b=document.getElementById('board');
+ b.innerHTML='';
+ board.flat().forEach(v=>{
+   let d=document.createElement('div');
+   d.className='tile';
+   d.textContent=v||'';
+   b.appendChild(d);
+ });
+ scoreEl.textContent=score;
+ bestEl.textContent=best;
+ coinsEl.textContent=coins;
+ save();
+}
+
+function addTile(){
+ let e=[];
+ for(let r=0;r<4;r++)for(let c=0;c<4;c++)if(board[r][c]===0)e.push([r,c]);
+ if(!e.length)return;
+ let p=e[Math.floor(Math.random()*e.length)];
+ board[p[0]][p[1]]=Math.random()<0.9?2:4;
+}
+
+function newGame(){
+ board=Array.from({length:4},()=>Array(4).fill(0));
+ score=0; history=[];
+ addTile(); addTile();
+ render();
+ msg("New game started");
+}
+
+function slide(a){
+ a=a.filter(Boolean);
+ for(let i=0;i<a.length-1;i++){
+   if(a[i]===a[i+1]){
+     a[i]*=2;
+     score+=a[i];
+     coins++;
+     if(a[i]===2048) msg("🎉 Victory! Reached 2048");
+     a[i+1]=0;
+   }
+ }
+ a=a.filter(Boolean);
+ while(a.length<4)a.push(0);
+ return a;
+}
+
+function move(dir){
+ if(paused)return;
+ history.push(JSON.stringify({board,score,coins}));
+ let old=JSON.stringify(board);
+
+ if(dir==='left')for(let r=0;r<4;r++)board[r]=slide(board[r]);
+ if(dir==='right')for(let r=0;r<4;r++)board[r]=slide(board[r].reverse()).reverse();
+ if(dir==='up'){
+  for(let c=0;c<4;c++){let col=[0,1,2,3].map(r=>board[r][c]);col=slide(col);for(let r=0;r<4;r++)board[r][c]=col[r];}
+ }
+ if(dir==='down'){
+  for(let c=0;c<4;c++){let col=[0,1,2,3].map(r=>board[r][c]).reverse();col=slide(col).reverse();for(let r=0;r<4;r++)board[r][c]=col[r];}
+ }
+
+ if(JSON.stringify(board)!==old){addTile();if(score>best)best=score;render();checkGameOver();}
+}
+
+function checkGameOver(){
+ for(let r=0;r<4;r++)for(let c=0;c<4;c++){
+   if(board[r][c]===0)return;
+   if(c<3 && board[r][c]===board[r][c+1])return;
+   if(r<3 && board[r][c]===board[r+1][c])return;
+ }
+ msg("💀 Game Over");
+}
+
+function undo(){
+ if(!history.length)return;
+ let s=JSON.parse(history.pop());
+ board=s.board;score=s.score;coins=s.coins;
+ render();
+}
+
+function dailyReward(){
+ let t=new Date().toDateString();
+ if(localStorage.reward!==t){
+   coins+=100;
+   localStorage.reward=t;
+   render();
+   msg("🎁 +100 coins");
+ }
+}
+
+function pauseGame(){
+ paused=!paused;
+ msg(paused?"⏸ Game Paused":"▶ Game Resumed");
+}
+
+function toggleTheme(){document.body.classList.toggle('dark');}
+
+document.addEventListener('keydown',e=>{
+ if(e.key==='ArrowLeft')move('left');
+ if(e.key==='ArrowRight')move('right');
+ if(e.key==='ArrowUp')move('up');
+ if(e.key==='ArrowDown')move('down');
+});
+
+let sx,sy;
+document.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;});
+document.addEventListener('touchend',e=>{
+ let dx=e.changedTouches[0].clientX-sx;
+ let dy=e.changedTouches[0].clientY-sy;
+ if(Math.abs(dx)>Math.abs(dy))move(dx>0?'right':'left');
+ else move(dy>0?'down':'up');
+});
+
+const scoreEl=document.getElementById('score');
+const bestEl=document.getElementById('best');
+const coinsEl=document.getElementById('coins');
+
+if(localStorage.board){
+ try{
+   board=JSON.parse(localStorage.board);
+   score=+localStorage.score||0;
+   render();
+ }catch(e){newGame();}
+}else newGame();
+</script>
+</body>
+</html>
